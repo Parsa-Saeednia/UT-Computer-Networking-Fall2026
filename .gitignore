@@ -83,6 +83,7 @@ CA2-WiFi-Performance/Makefile
 *.vec
 *.sca
 *.elog
+*.qtenvrc
 !CA2-WiFi-Performance/phase*/results/.gitkeep
 libca2.so
 libca2.dll
