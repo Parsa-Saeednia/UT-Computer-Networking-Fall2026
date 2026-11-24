@@ -92,3 +92,10 @@ libca2.dll
 .ipynb_checkpoints/
 __pycache__/
 *.pyc
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
