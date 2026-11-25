@@ -212,7 +212,7 @@ From the 50 simulation runs ($10\text{ values of } n \times 5\text{ repetitions}
   - Wavelength: $\lambda = \frac{c}{f_c} = \frac{299,792,458\text{ m/s}}{5.17 \times 10^9\text{ Hz}} \approx 0.057987\text{ m}$
   - Transmitter Power: $P_t = 20\text{ mW} = 13.0103\text{ dBm}$
   - Receiver Sensitivity / Energy Detection: $S_{th} = -77.0\text{ dBm}$
-  - Toplogy: AP at $(200, 200)$, `host[0]` at $(300, 200)$, `host[1]` at $(100, 200)$.
+  - Topology: AP at $(200, 200)$, `host[0]` at $(300, 200)$, `host[1]` at $(100, 200)$.
     - Station-to-AP distance: $d_{AP} = 100\text{ m}$
     - Inter-station distance: $d_{inter} = 200\text{ m}$
 
@@ -226,7 +226,7 @@ $$P_r = P_t \left( \frac{\lambda}{4\pi d} \right)^2 \implies P_{r,\text{dBm}} = 
 
 2. **Received Power between the two stations ($d = 200\text{ m}$):**
    $$\text{FSPL}(200\text{ m}) = 86.72 + 20\log_{10}(2) \approx 92.74\text{ dB}$$
-   $$P_r(200\text{ m}) = 13.01 - 92.74 = \mathbf{-79.73\text{ dBm}} < -77.0\text{ dBm} \quad \text{\textbf{(Undetectable!) }$$
+   $$P_r(200\text{ m}) = 13.01 - 92.74 = \mathbf{-79.73\text{ dBm}} < -77.0\text{ dBm} \quad \text{\textbf{(Undetectable!)}}$$
    *Stations cannot detect each other's transmissions; they are mutually hidden terminals.*
 
 ---
@@ -261,8 +261,8 @@ From the 10 simulation runs (5 repetitions each, 10s measurement interval):
 ---
 
 ### Question 3-10: Detailed Overhead vs. Collision Savings Analysis
-- RTS frame: $20\text{ Bytes}$, CTS frame: $14\text{ Bytes}$. Both sent at ACK rate ($12\text{ Mbps}$).
-- **PPDU Durations:**
+- RTS frame: $20\text{ Bytes}$, CTS frame: $14\text{ Bytes}$. *(At the base rate $R = 12\text{ Mbps}$, $T_{RTS} = 36.0\,\mu\text{s}$ and $T_{CTS} = 32.0\,\mu\text{s}$; note that in INET's mandatory basic rate set `{6, 12, 24} Mbps`, control frames can also be transmitted at $24\text{ Mbps}$, yielding $T_{RTS} = T_{CTS} = 28.0\,\mu\text{s}$ in trace logs and even higher net savings.)*
+- **PPDU Durations (at $R = 12\text{ Mbps}$ conservative baseline):**
   $$T_{RTS} = 20\,\mu\text{s} + 4 \cdot \lceil (16 + 160 + 6)/48 \rceil = 20 + 4(4) = \mathbf{36.0\,\mu\text{s}}$$
   $$T_{CTS} = 20\,\mu\text{s} + 4 \cdot \lceil (16 + 112 + 6)/48 \rceil = 20 + 3(4) = \mathbf{32.0\,\mu\text{s}}$$
 
@@ -292,30 +292,25 @@ From the 10 simulation runs (5 repetitions each, 10s measurement interval):
 
 ---
 
-## 6. Sequence Chart Screenshot Coordinates (For Qtenv GUI)
+## 6. Report Figures & Sequence Chart Coordinates
 
-To capture the required screenshots in the OMNeT++ IDE:
+All figures are stored in `CA2-WiFi-Performance/report/figures/` (excluded from Git via `.gitignore`):
 
-1. **Single Frame Exchange (`results/Timing-#0.elog`):**
-   - Open file in OMNeT++ IDE $\to$ Right-click $\to$ Select Modules: `ap` and `host[0]`.
-   - Set **Timeline Mode $\to$ Linear**.
-   - Zoom to simulation interval: **$t = 0.100\text{ ms}$ to $1.200\text{ ms}$** (Exchange 1).
-   - Annotations:
-     - $t = 0.050\text{ ms} \to 0.142\text{ ms}$: DIFS ($34\,\mu\text{s}$) + initial backoff.
-     - $t = 0.142\text{ ms} \to 1.086\text{ ms}$: DATA PPDU ($944\,\mu\text{s}$).
-     - $t = 1.086\text{ ms} \to 1.102\text{ ms}$: SIFS ($16\,\mu\text{s}$).
-     - $t = 1.102\text{ ms} \to 1.134\text{ ms}$: ACK PPDU ($32\,\mu\text{s}$).
+- **Analytical & Simulation Charts (`phase1.ipynb`):**
+  - `phase1_slotted_model.png` — Analytical throughput $S(n)$ under fixed $\tau_0 = 2/17$.
+  - `phase1_sim_vs_models.png` — 50-run simulation throughput ($95\%$ CI) vs. fixed-$\tau_0$ and measured-$\hat{\tau}(n)$ models.
+  - `phase1_cw_trace.png` — `host[0]` Binary Exponential Backoff CW trace ($15 \to 1023$ slots) at $n=10$.
+  - `phase1_hidden_rts_comparison.png` — Hidden terminal throughput ($+27.05\%$) and Jain's Fairness ($0.8322 \to 0.9949$) comparison.
 
-2. **Hidden Collision Without RTS/CTS (`results/HiddenTrace-rtsThreshold=3000B-#0.elog`):**
-   - Select Modules: `ap`, `host[0]`, `host[1]`.
-   - Zoom to interval: **$t = 0.100\text{ ms}$ to $1.200\text{ ms}$**.
-   - Event to capture: `host[0]` transmits `req-79-1` at $t \approx 142\,\mu\text{s}$; `host[1]` cannot sense it and transmits `req-118-1`. Both overlap at the AP, triggering `corruptedFrameReceived` at the AP radio.
-
-3. **Virtual Carrier Sensing via NAV (`results/HiddenTrace-rtsThreshold=100B-#0.elog`):**
-   - Select Modules: `ap`, `host[0]`, `host[1]`.
-   - Zoom to interval: **$t = 0.080\text{ ms}$ to $1.250\text{ ms}$**.
-   - Event to capture:
-     - At $t = 107.0\,\mu\text{s}$, `host[0]` sends `WlanRts`.
-     - At $t = 151.3\,\mu\text{s}$, `ap` broadcasts `WlanCts`.
-     - At **$t = 151.67\,\mu\text{s}$ (Event #42)**, `host[1]` receives the CTS and sets its **NAV timer for $1008\,\mu\text{s}$** (until $t = 1159.67\,\mu\text{s}$).
-     - `host[1]` stays silent while `host[0]` completes its DATA ($944\,\mu\text{s}$) and receives ACK ($32\,\mu\text{s}$) without interference.
+- **Sequence Chart Diagrams & OMNeT++ IDE Captures:**
+  1. **Single Frame Exchange (`Timing-#0.elog` $\to$ `phase1_seq_timing.png` / `phase1_timing_simulation.png`):**
+     - $t = 50.0 \to 142.0\,\mu\text{s}$: DIFS ($34\,\mu\text{s}$) + initial backoff ($58\,\mu\text{s}$).
+     - $t = 142.0 \to 1086.0\,\mu\text{s}$: DATA PPDU (`req-78-1`, $944\,\mu\text{s}$).
+     - $t = 1086.0 \to 1102.0\,\mu\text{s}$: SIFS ($16\,\mu\text{s}$).
+     - $t = 1102.0 \to 1134.1\,\mu\text{s}$: ACK PPDU (`WlanAck`, $32\,\mu\text{s}$).
+  2. **Hidden Collision Without RTS/CTS (`HiddenTrace-rtsThreshold=3000B-#0.elog` $\to$ `phase1_seq_hidden_collision.png` / `phase1_hidden_collision_simulation.png`):**
+     - `host[0]` transmits `req-79-1` ($142.0 \to 1086.3\,\mu\text{s}$); `host[1]` cannot sense it and transmits `req-118-1` ($169.0 \to 1113.3\,\mu\text{s}$). Overlapping signals corrupt reception at `ap`, yielding no ACK.
+  3. **Virtual Carrier Sensing via RTS/CTS & NAV (`HiddenTrace-rtsThreshold=100B-#0.elog` $\to$ `phase1_seq_hidden_rts_cts.png` / `phase1_hidden_rts_cts.png`):**
+     - $t = 79.0 \to 107.3\,\mu\text{s}$: `host[0]` sends `RTS`.
+     - $t = 123.3 \to 151.7\,\mu\text{s}$: `ap` broadcasts `CTS`; `host[1]` receives CTS at $t = 151.7\,\mu\text{s}$ and sets its **NAV silent interval** until $t = 1160.3\,\mu\text{s}$.
+     - $t = 167.7 \to 1112.0\,\mu\text{s}$: `host[0]` completes collision-free DATA ($944\,\mu\text{s}$), followed by `WlanAck` at $1128.0 \to 1160.3\,\mu\text{s}$ ($32\,\mu\text{s}$).
