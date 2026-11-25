@@ -99,3 +99,11 @@ venv/
 env/
 ENV/
 
+# Generated Report Figures and Images
+*.png
+*.jpg
+*.jpeg
+*.svg
+CA2-WiFi-Performance/report/figures/
+
+
