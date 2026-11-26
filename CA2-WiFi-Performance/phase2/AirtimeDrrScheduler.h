@@ -17,6 +17,9 @@ class AirtimeDrrScheduler : public AirtimeSchedulerBase
 
     virtual void initialize(int stage) override;
     virtual int schedulePacket() override;
+
+  private:
+    bool hasAnyPacket() const;
 };
 
 } // namespace ca2
