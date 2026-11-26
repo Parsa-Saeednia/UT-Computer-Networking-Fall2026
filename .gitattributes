@@ -1,0 +1,6 @@
+* text=auto
+
+*.in text eol=lf
+*.out text eol=lf
+*.csv text eol=lf
+*.sh text eol=lf
